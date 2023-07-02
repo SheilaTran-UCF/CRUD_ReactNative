@@ -20,6 +20,7 @@ import {moderateScale, getWidth, getHeight} from '../../helper';
 import {useEffect, useState} from 'react';
 // import React, {useState} from 'react';
 
+//  khai bao 1 array co nhieu  object
 const listName = [
   {
     id: '1',
@@ -53,13 +54,16 @@ const listName = [
   },
 ];
 
+//  component render UI
 const Detail = ({navigation}) => {
+  // useState work with UI
   const [data, setData] = useState([]);
   const [input, setInput] = useState('');
   const [id, setId] = useState('');
 
   console.log({data});
 
+  // function de tao ra 1 chuoi ngau nhien
   function makeid(length) {
     let result = '';
     const characters =
@@ -73,39 +77,58 @@ const Detail = ({navigation}) => {
     return result;
   }
 
+  //  function de lay ten & ID cua item, sau do setInput (set name) & setID (set id)
   const getItem = (name, id) => {
     setInput(name);
     setId(id);
   };
 
+  // function delete item , tim ra item nao co trung voi id thi delete
   const onDelete = id => {
     const filterData = data.filter(item => item.id !== id);
     setData(filterData);
   };
 
+  // function Create, tao ra 1 string radom(makeid ), input , sau do truyen vao ,
   const onCreate = () => {
     if (input) {
       //  makeid(8) la tu cho 8 ky tu cua lenght
       setData([...data, {id: makeid(8), name: input, image: Images.delete}]);
+      // clear input , tro ve ban dau
       setInput('');
     }
   };
-
+  // funation edit , format data, tim ra id nao muon sua, format lai id input then edit
   const onEdit = () => {
-    setData([...data, {id: 1, name: input, image: Images.delete}]);
+    const formatData = data.map(item => {
+      if (item.id === id) {
+        return {
+          ...item,
+          name: input,
+        };
+      }
+      return item;
+    });
+    setData(formatData);
+    // clear data
+    setId('');
+    setInput('');
   };
 
+  // function khai bao 1 UI cho item cua flatlist
   const ItemRender = ({namee, id}) => (
     <View style={styles.item}>
       <Text style={styles.itemText} onPress={() => getItem(namee, id)}>
         {namee}
       </Text>
+
       <TouchableOpacity onPress={() => onDelete(id)}>
         <Image style={styles.delete} source={Images.delete} />
       </TouchableOpacity>
     </View>
   );
 
+  // function set lai data listName
   useEffect(() => {
     setData(listName);
   }, []);
@@ -133,11 +156,22 @@ const Detail = ({navigation}) => {
           value={input}
           onChangeText={setInput}
         />
-        <TouchableOpacity style={{paddingHorizontal: 10}} onPress={onCreate}>
+        <TouchableOpacity
+          style={{paddingHorizontal: 10}}
+          onPress={() => {
+            if (id) {
+              onEdit();
+            }
+            if (!id) {
+              onCreate();
+            }
+          }}>
           <Image style={styles.plus} source={Images.plus} />
         </TouchableOpacity>
       </View>
       <FlatList
+        // useEffect
+        // data mau xanh la mac dinh cua flatlist
         data={data}
         renderItem={({item}) => (
           <ItemRender namee={item.name} image={item.image} id={item.id} />
